@@ -15,6 +15,7 @@ import android.view.Surface;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Player.EventListener;
@@ -237,6 +238,11 @@ public class VideoPlayerPlugin implements MethodCallHandler {
       exoPlayer.setPlayWhenReady(true);
     }
 
+    void setPlaySpeed(double value) {
+      PlaybackParameters speed = new PlaybackParameters((float) Math.max(0.0, Math.min(2.0, value)));
+      exoPlayer.setPlaybackParameters(speed);
+    }
+
     void pause() {
       exoPlayer.setPlayWhenReady(false);
     }
@@ -411,6 +417,10 @@ public class VideoPlayerPlugin implements MethodCallHandler {
         break;
       case "setVolume":
         player.setVolume(call.argument("volume"));
+        result.success(null);
+        break;
+      case "setPlaySpeed":
+        player.setPlaySpeed(call.argument("speed"));
         result.success(null);
         break;
       case "play":

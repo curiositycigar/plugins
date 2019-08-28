@@ -45,6 +45,7 @@ class VideoPlayerValue {
     this.isPlaying = false,
     this.isLooping = false,
     this.isBuffering = false,
+    this.speed = 1.0,
     this.volume = 1.0,
     this.errorDescription,
   });
@@ -67,6 +68,9 @@ class VideoPlayerValue {
 
   /// True if the video is playing. False if it's paused.
   final bool isPlaying;
+
+  /// playback will be sped up
+  final double speed;
 
   /// True if the video is looping.
   final bool isLooping;
@@ -97,6 +101,7 @@ class VideoPlayerValue {
     Duration position,
     List<DurationRange> buffered,
     bool isPlaying,
+    double speed,
     bool isLooping,
     bool isBuffering,
     double volume,
@@ -108,6 +113,7 @@ class VideoPlayerValue {
       position: position ?? this.position,
       buffered: buffered ?? this.buffered,
       isPlaying: isPlaying ?? this.isPlaying,
+      speed: speed ?? this.speed,
       isLooping: isLooping ?? this.isLooping,
       isBuffering: isBuffering ?? this.isBuffering,
       volume: volume ?? this.volume,
@@ -309,6 +315,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     await _applyPlayPause();
   }
 
+  Future<void> setPlaySpeed(double speed) async {
+    value = value.copyWith(speed: speed);
+    await _applySpeedChange();
+  }
+
   Future<void> setLooping(bool looping) async {
     value = value.copyWith(isLooping: looping);
     await _applyLooping();
@@ -358,6 +369,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         <String, dynamic>{'textureId': _textureId},
       );
     }
+  }
+
+  Future<void> _applySpeedChange() async {
+    if (!value.initialized || _isDisposed) {
+      return;
+    }
+    await _channel.invokeMethod<void>(
+      'setPlaySpeed',
+      <String, dynamic>{'textureId': _textureId, 'speed': value.speed},
+    );
   }
 
   Future<void> _applyVolume() async {
